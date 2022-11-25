@@ -17,7 +17,7 @@ async function run() {
     try {
         const addBooksCollection = client.db('assignmenttwelve').collection('books');
 
-        // Add food Data
+        // Add Books Data
         app.post('/books', async (req, res) => {
             const books = req.body;
             const result = await addBooksCollection.insertOne(books);
@@ -25,10 +25,17 @@ async function run() {
         });
 
         app.get('/books', async (req, res) => {
-            const books = {};
-            const query = await addBooksCollection.find(books).toArray();
-            res.send(query);
+            let query = {};
+            if(req.query.email){
+                query = {
+                    email: req.query.email
+                }
+            }
+            const cursor  =  addBooksCollection.find(query);
+            const booksdata = await cursor.toArray();
+            res.send(booksdata);
         });
+
 
         // // Add Post
         // app.post('/posts', async (req, res) => {
@@ -37,12 +44,6 @@ async function run() {
         //     res.send(result);
         // });
 
-        // app.get('/post', async (req, res) => {
-        //     const email = req.query.email;
-        //     const query = { email: email }
-        //     const posts = await addPostCollection.find(query).toArray();
-        //     res.send(posts);
-        // });
 
         // // Json Web Toke (JWT)
         // app.get('/jwt', async (req, res) => {
