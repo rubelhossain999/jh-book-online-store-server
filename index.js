@@ -16,6 +16,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         const addBooksCollection = client.db('assignmenttwelve').collection('books');
+        const usersCollection = client.db('assignmenttwelve').collection('users')
 
         // Add Books Data
         app.post('/books', async (req, res) => {
@@ -36,13 +37,24 @@ async function run() {
             res.send(booksdata);
         });
 
+        // Add User Data from Client Site
+        app.post('/users', async (req, res) => {
+            const users = req.body;
+            const result = await usersCollection.insertOne(users);
+            res.send(result);
+        });
 
-        // // Add Post
-        // app.post('/posts', async (req, res) => {
-        //     const postdata = req.body;
-        //     const result = await addPostCollection.insertOne(postdata);
-        //     res.send(result);
-        // });
+        app.get('/users', async (req, res) => {
+            let query = {};
+            if(req.query.email){
+                query = {
+                    email: req.query.email
+                }
+            }
+            const cursor  =  usersCollection.find(query);
+            const booksdata = await cursor.toArray();
+            res.send(booksdata);
+        });
 
 
         // // Json Web Toke (JWT)
