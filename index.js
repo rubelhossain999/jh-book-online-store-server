@@ -13,6 +13,55 @@ app.use(express.json());
 const uri = `mongodb+srv://${process.env.DB_USER_NAME}:${process.env.DB_PASSWORD}@cluster0.nqqpx5x.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+async function run() {
+    try {
+        const addBooksCollection = client.db('assignmenttwelve').collection('books');
+
+        // Add food Data
+        app.post('/books', async (req, res) => {
+            const books = req.body;
+            const result = await addBooksCollection.insertOne(books);
+            res.send(result);
+        });
+
+        app.get('/books', async (req, res) => {
+            const books = {};
+            const query = await addBooksCollection.find(books).toArray();
+            res.send(query);
+        });
+
+        // // Add Post
+        // app.post('/posts', async (req, res) => {
+        //     const postdata = req.body;
+        //     const result = await addPostCollection.insertOne(postdata);
+        //     res.send(result);
+        // });
+
+        // app.get('/post', async (req, res) => {
+        //     const email = req.query.email;
+        //     const query = { email: email }
+        //     const posts = await addPostCollection.find(query).toArray();
+        //     res.send(posts);
+        // });
+
+        // // Json Web Toke (JWT)
+        // app.get('/jwt', async (req, res) => {
+        //     const email = req.query.email;
+        //     const query = { email: email };
+        //     const user = await addPostCollection.findOne(query);
+        //     if (user) {
+        //         const token = jwt.sign({ email }, process.env.JWT_TOKEN, { expiresIn: '1h' })
+        //         return res.send({ accessToken: token });
+        //     }
+        //     res.status(403).send({ accessToken: '' });
+        // });
+
+    }
+    finally { }
+
+}
+run().catch(error => console.log(error))
+
 
 
 // Start Server Code
