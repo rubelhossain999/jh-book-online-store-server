@@ -57,17 +57,17 @@ async function run() {
         });
 
 
-        // // Json Web Toke (JWT)
-        // app.get('/jwt', async (req, res) => {
-        //     const email = req.query.email;
-        //     const query = { email: email };
-        //     const user = await addPostCollection.findOne(query);
-        //     if (user) {
-        //         const token = jwt.sign({ email }, process.env.JWT_TOKEN, { expiresIn: '1h' })
-        //         return res.send({ accessToken: token });
-        //     }
-        //     res.status(403).send({ accessToken: '' });
-        // });
+        // Json Web Toke (JWT)
+        app.get('/jwt', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const user = await addPostCollection.findOne(query);
+            if (user) {
+                const token = jwt.sign({ email }, process.env.JWT_TOKEN, { expiresIn: '1h' })
+                return res.send({ accessToken: token });
+            }
+            res.status(403).send({ accessToken: '' });
+        });
 
     }
     finally { }
