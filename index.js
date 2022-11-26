@@ -38,6 +38,30 @@ async function run() {
             res.send(booksdata);
         });
 
+        // Specific Data Category:freebook load for UI
+        app.get('/books/categorie/freebook', async (req, res) => {
+            const query = {categorie: 'freebook'}
+            const cursor = addBooksCollection.find(query);
+            const booksdata = await cursor.toArray();
+            res.send(booksdata);
+        });
+
+        // Specific Data Category:pdfbook load for UI
+        app.get('/books/categorie/pdfbook', async (req, res) => {
+            const query = {categorie: 'pdfbook'}
+            const cursor = addBooksCollection.find(query);
+            const booksdata = await cursor.toArray();
+            res.send(booksdata);
+        });
+
+        // Specific Data Category:premiumbook load for UI
+        app.get('/books/categorie/premiumbook', async (req, res) => {
+            const query = {categorie: 'premiumbook'}
+            const cursor = addBooksCollection.find(query);
+            const booksdata = await cursor.toArray();
+            res.send(booksdata);
+        });
+
         // Add User Data from Client Site
         app.post('/users', async (req, res) => {
             const users = req.body;
@@ -57,6 +81,9 @@ async function run() {
             res.send(booksdata);
         });
 
+        /// Category Query from the Mongodb
+
+
 
         // Add Registration Uer on the Database
         app.post('/regisusers', async (req, res) => {
@@ -64,7 +91,6 @@ async function run() {
             const result = await regisCollection.insertOne(regisusers);
             res.send(result);
         });
-
         
         app.get('/regisusers', async (req, res) => {
             let query = {};
@@ -78,7 +104,7 @@ async function run() {
             res.send(booksdata);
         });
         
-        app.delete('/regisusers/delete/:id', async (req, res) => {
+        app.delete('/regisusers/:id', async (req, res) => {
             const id = req.params.id;
             console.log(id);
             const query = { _id: ObjectId(id) };
