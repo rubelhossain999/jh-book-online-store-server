@@ -19,7 +19,8 @@ async function run() {
         const usersCollection = client.db('assignmenttwelve').collection('users');
         const regisCollection = client.db('assignmenttwelve').collection('regisusers');
 
-        // Add Books Data
+        // ========================= AddBooksCollection Area =========================
+
         app.post('/books', async (req, res) => {
             const books = req.body;
             const result = await addBooksCollection.insertOne(books);
@@ -45,18 +46,38 @@ async function run() {
             res.send(result);
         })
 
-        // Make a Ads Running for API
         app.put('/books/adsrun/:id', async (req, res) => {
             const id = req.params.id;
-            const query = { _id: ObjectId(id) };
-            const result = await addBooksCollection.deleteOne(query);
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true }
+            const updateDoc = {
+                $set: {
+                    adsrun: "adsrun"
+                }
+            }
+            const result = await addBooksCollection.updateOne(filter, updateDoc, options);
             res.send(result);
         })
+
+        app.get('/books/categorie/freebook', async (req, res) => {
+            const query = { categorie: 'freebook' }
+            const cursor = addBooksCollection.find(query);
+            const booksdata = await cursor.toArray();
+            res.send(booksdata);
+        });
+
+        /// Specific books adsrun product API
+        app.get('/books/adsrun', async (req, res) => {
+            const query = { adsrun: 'adsrun' }
+            const cursor = addBooksCollection.find(query);
+            const booksdata = await cursor.toArray();
+            res.send(booksdata);
+        });
 
 
         // Specific Data Category:freebook load for UI
         app.get('/books/categorie/freebook', async (req, res) => {
-            const query = {categorie: 'freebook'}
+            const query = { categorie: 'freebook' }
             const cursor = addBooksCollection.find(query);
             const booksdata = await cursor.toArray();
             res.send(booksdata);
@@ -64,7 +85,7 @@ async function run() {
 
         // Specific Data Category:pdfbook load for UI
         app.get('/books/categorie/pdfbook', async (req, res) => {
-            const query = {categorie: 'pdfbook'}
+            const query = { categorie: 'pdfbook' }
             const cursor = addBooksCollection.find(query);
             const booksdata = await cursor.toArray();
             res.send(booksdata);
@@ -72,13 +93,15 @@ async function run() {
 
         // Specific Data Category:premiumbook load for UI
         app.get('/books/categorie/premiumbook', async (req, res) => {
-            const query = {categorie: 'premiumbook'}
+            const query = { categorie: 'premiumbook' }
             const cursor = addBooksCollection.find(query);
             const booksdata = await cursor.toArray();
             res.send(booksdata);
         });
 
-        // Add User Data from Client Site
+
+        // ============== usersCollection Area ==============
+
         app.post('/users', async (req, res) => {
             const users = req.body;
             const result = await usersCollection.insertOne(users);
@@ -101,13 +124,14 @@ async function run() {
 
 
 
-        // Add Registration Uer on the Database
+        // =============== RegisCollection Area ==============
+
         app.post('/regisusers', async (req, res) => {
             const regisusers = req.body;
             const result = await regisCollection.insertOne(regisusers);
             res.send(result);
         });
-        
+
         app.get('/regisusers', async (req, res) => {
             let query = {};
             if (req.query.email) {
@@ -119,15 +143,29 @@ async function run() {
             const booksdata = await cursor.toArray();
             res.send(booksdata);
         });
-        
+
+        /// User info verified
+        app.put('/regisusers/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true }
+            const updateDoc = {
+                $set: {
+                    verified: "verified"
+                }
+            }
+            const result = await regisCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+        })
+
         app.delete('/regisusers/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await regisCollection.deleteOne(query);
             res.send(result);
         })
-        
-        
+
+
         // // Json Web Toke (JWT)
         // app.get('/jwt', async (req, res) => {
         //     const email = req.query.email;
@@ -139,7 +177,7 @@ async function run() {
         //     }
         //     res.status(403).send({ accessToken: '' });
         // });
-        
+
     }
     finally { }
 
