@@ -38,6 +38,22 @@ async function run() {
             res.send(booksdata);
         });
 
+        app.delete('/books/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await addBooksCollection.deleteOne(query);
+            res.send(result);
+        })
+
+        // Make a Ads Running for API
+        app.put('/books/adsrun/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await addBooksCollection.deleteOne(query);
+            res.send(result);
+        })
+
+
         // Specific Data Category:freebook load for UI
         app.get('/books/categorie/freebook', async (req, res) => {
             const query = {categorie: 'freebook'}
@@ -106,7 +122,6 @@ async function run() {
         
         app.delete('/regisusers/:id', async (req, res) => {
             const id = req.params.id;
-            console.log(id);
             const query = { _id: ObjectId(id) };
             const result = await regisCollection.deleteOne(query);
             res.send(result);
