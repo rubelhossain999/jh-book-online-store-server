@@ -21,11 +21,13 @@ async function run() {
 
         // ========================= AddBooksCollection Area =========================
 
+        
         app.post('/books', async (req, res) => {
             const books = req.body;
             const result = await addBooksCollection.insertOne(books);
             res.send(result);
         });
+        
 
         app.get('/books', async (req, res) => {
             let query = {};
@@ -38,14 +40,22 @@ async function run() {
             const booksdata = await cursor.toArray();
             res.send(booksdata);
         });
-
+        
+        app.get('/books/data/:id', async (req, res) => {
+            const id = req.params.id;
+            const singquery = { _id: ObjectId(id) };
+            const singresult = await addBooksCollection.findOne(singquery);
+            res.send(singresult);
+        })
+        
         app.delete('/books/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await addBooksCollection.deleteOne(query);
             res.send(result);
         })
-
+        
+        
         app.put('/books/adsrun/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) };
