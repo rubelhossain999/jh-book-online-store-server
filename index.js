@@ -39,6 +39,7 @@ async function run() {
         const addBooksCollection = client.db('assignmenttwelve').collection('books');
         const usersCollection = client.db('assignmenttwelve').collection('users');
         const regisCollection = client.db('assignmenttwelve').collection('regisusers');
+        const orsersCollection = client.db('assignmenttwelve').collection('orders');
 
         // ========================= AddBooksCollection Area =========================
         app.post('/books', async (req, res) => {
@@ -243,7 +244,7 @@ async function run() {
             const allseller = await cursor.toArray();
             res.send(allseller);
         });
-        app.get('/regisusers/customer/', verifyJWT, async (req, res) => {
+        app.get('/regisusers/customer/', async (req, res) => {
             const query = { role: 'customer' }
             const cursor = regisCollection.find(query);
             const allseller = await cursor.toArray();
@@ -269,6 +270,20 @@ async function run() {
             }
             res.status(403).send({ accessToken: '' });
         });
+
+        ///// All Oder Items API
+        app.post('/orders', async (req, res) => {
+            const regisusers = req.body;
+            const result = await orsersCollection.insertOne(regisusers);
+            res.send(result);
+        });
+        
+        app.get('/orders', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const orderitems = await orsersCollection.find(query).toArray();
+            res.send(orderitems);
+        })
 
     }
     finally { }
