@@ -3,6 +3,7 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken")
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
+const stripe = require("stripe")(process.env.STRIP_SERET);
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -40,6 +41,9 @@ async function run() {
         const usersCollection = client.db('assignmenttwelve').collection('users');
         const regisCollection = client.db('assignmenttwelve').collection('regisusers');
         const orsersCollection = client.db('assignmenttwelve').collection('orders');
+        const reportsCollection = client.db('assignmenttwelve').collection('reports');
+        const cardPaymetCollection = client.db('assignmenttwelve').collection('cardPaymet');
+
 
         // ========================= AddBooksCollection Area =========================
         app.post('/books', async (req, res) => {
@@ -48,21 +52,18 @@ async function run() {
             res.send(result);
         });
 
-        // This is a My booking Api Data with JWT
-        app.get('/books', verifyJWT, async (req, res) => {
-            const email = req.query.email;
 
-            const decodedEmail = req.decoded.email;
-            if (email !== decodedEmail) {
-                return res.status(403).send({ message: 'forbidden access' })
+        app.get('/booksdata', async (req, res) => {
+            let query = {};
+            if (req.query.email) {
+                query = {
+                    email: req.query.email
+                }
             }
-
-            const query = { email: email }
             const cursor = addBooksCollection.find(query);
             const booksdata = await cursor.toArray();
             res.send(booksdata);
         });
-
 
         app.get('/books/data/:id', async (req, res) => {
             const id = req.params.id;
@@ -164,6 +165,7 @@ async function run() {
             const result = await regisCollection.insertOne(regisusers);
             res.send(result);
         });
+
 
         app.get('/regisusers', async (req, res) => {
             let query = {};
@@ -271,19 +273,103 @@ async function run() {
             res.status(403).send({ accessToken: '' });
         });
 
-        ///// All Oder Items API
+        ///////// All Oder Items API ///////////////
+
         app.post('/orders', async (req, res) => {
             const regisusers = req.body;
             const result = await orsersCollection.insertOne(regisusers);
             res.send(result);
         });
-        
-        // app.get('/orders', async (req, res) => {
-        //     const email = req.query.email;
-        //     const query = { email: email };
-        //     const orderitems = await orsersCollection.find(query).toArray();
-        //     res.send(orderitems);
-        // })
+
+        app.get('/ordersdata', async (req, res) => {
+            let query = {};
+            if (req.query.email) {
+                query = {
+                    email: req.query.email
+                }
+            }
+            const cursor = orsersCollection.find(query);
+            const booksdata = await cursor.toArray();
+            res.send(booksdata);
+        });
+
+        app.get('/ordersdata/:id', async (req, res) => {
+            const orderid = req.params.id;
+            const orderquery = { _id: ObjectId(orderid) };
+            const orderresult = await orsersCollection.findOne(orderquery);
+            res.send(orderresult);
+        });
+
+        app.delete('/ordersdata/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await orsersCollection.deleteOne(query);
+            res.send(result);
+        })
+
+
+        //////////// Reports Collections  //////////////////////
+        app.post('/reports', async (req, res) => {
+            const reportbooks = req.body;
+            const reportresult = await reportsCollection.insertOne(reportbooks);
+            res.send(reportresult);
+        });
+
+        app.get('/reports', async (req, res) => {
+            let query = {};
+            if (req.query.email) {
+                query = {
+                    email: req.query.email
+                }
+            }
+            const cursor = reportsCollection.find(query);
+            const booksdata = await cursor.toArray();
+            res.send(booksdata);
+        });
+
+        // Delete Report Products
+        app.delete('/reportsdata/data/:id', async (req, res) => {
+            const reid = req.params.id;
+            const requery = { _id: ObjectId(reid) };
+            const reresult = await reportsCollection.deleteOne(requery);
+            res.send(reresult);
+        })
+
+        // Strip Payment System
+        app.post("/create-payment-intent", async (req, res) => {
+            const ordersdata = req.body;
+            const pri = ordersdata.pri;
+            const amount = pri * 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                currency: "usd",
+                amount: amount,
+                "payment_method_types": [
+                    "card"
+                ]
+            });
+            res.send({
+                clientSecret: paymentIntent.client_secret,
+            });
+        });
+
+        // Card payment API
+        app.post('/cardpay', async (req, res) => {
+            const cartpayment = req.body;
+            const query = await cardPaymetCollection.insertOne(cartpayment);
+            const id = cartpayment.payment;
+            const filter = { _id: ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    paid: true,
+                    transactionID: cartpayment.paymentIntentId,
+                    productID: cartpayment.payment
+                    
+                }
+            }
+            const updateResult = await orsersCollection.updateOne(filter, updateDoc);
+            const updateaddbook = await addBooksCollection.updateOne(filter, updateDoc);
+            res.send(query);
+        });
 
     }
     finally { }
